@@ -2,18 +2,22 @@ from flask import Flask
 import requests
 import json
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
-# CONFIGURAÇÕES
-TOKEN = '7869611756:AAHkz2XV3j9XhX8rAqzSgos4VlVmnNdM3XQ'
-CANAL = -1002802811664
+# CONFIGURAÇÕES DO BOT
+TOKEN = 'SEU_TOKEN_AQUI'  # Substitua aqui pelo token real do seu bot
+CANAL = -1001234567890    # Substitua pelo ID do seu canal privado
 
 def main():
     hoje = datetime.now().strftime('%d-%m-%Y')
 
-    with open('palpites.json', encoding='utf-8') as f:
-        dados = json.load(f)
+    try:
+        with open('palpites.json', encoding='utf-8') as f:
+            dados = json.load(f)
+    except Exception as e:
+        return f"Erro ao ler o arquivo JSON: {e}"
 
     palpites_do_dia = dados.get(hoje)
 
@@ -31,15 +35,14 @@ def main():
     response = requests.post(url, data=data)
 
     if response.status_code == 200:
-        print("✅ Palpite enviado com sucesso!")
         return "✅ Enviado com sucesso!"
     else:
-        print("❌ Erro:", response.text)
-        return f"❌ Erro: {response.text}"
+        return f"❌ Erro ao enviar: {response.text}"
 
 @app.route('/')
 def index():
     return main()
 
-# Mantém o app rodando
-app.run(host='0.0.0.0', port=81)
+# ✅ ESTE BLOCO É O QUE PERMITE O FUNCIONAMENTO NO RENDER
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
